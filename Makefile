@@ -24,8 +24,6 @@ MANUAL =
 # automatically included
 EXTRA_DIST = 
 
-
-
 #------------------------------------------------------------------------------#
 #
 # things you might need to edit if you are using other C libraries
@@ -67,7 +65,7 @@ INSTALL_DATA = $(INSTALL) -p -m 644
 INSTALL_DIR     = $(INSTALL) -p -m 755 -d
 
 ALLSOURCES := $(SOURCES) $(SOURCES_android) $(SOURCES_cygwin) $(SOURCES_macosx) \
-	         $(SOURCES_iphoneos) $(SOURCES_linux) $(SOURCES_windows)
+	         $(SOURCES_iphoneos) $(SOURCES_linux) $(SOURCES_freebsd) $(SOURCES_windows)
 
 DISTDIR=$(LIBRARY_NAME)-$(LIBRARY_VERSION)
 ORIGDIR=pd-$(LIBRARY_NAME:~=)_$(LIBRARY_VERSION)
@@ -158,6 +156,21 @@ ifeq ($(UNAME),Linux)
   SHARED_LDFLAGS += -Wl,-soname,$(SHARED_LIB) -shared
   ALL_LIBS += -lc $(LIBS_linux)
   STRIP = strip --strip-unneeded -R .note -R .comment
+  DISTBINDIR=$(DISTDIR)-$(OS)-$(shell uname -m)
+endif
+ifeq ($(UNAME),FreeBSD)
+  CPU := $(shell uname -m)
+  SOURCES += $(SOURCES_freebsd)
+  EXTENSION = pd_freebsd
+  SHARED_EXTENSION = so
+  OS = freebsd
+  PD_PATH = /usr/local
+  OPT_CFLAGS = -O6 -funroll-loops -fomit-frame-pointer
+  ALL_CFLAGS += $(CFLAGS_freebsd) -fPIC
+  ALL_LDFLAGS += -rdynamic -shared -fPIC
+  SHARED_LDFLAGS += -Wl,-soname,$(SHARED_LIB) -shared
+  ALL_LIBS += -lc $(LIBS_freebsd)
+  STRIP = strip -s
   DISTBINDIR=$(DISTDIR)-$(OS)-$(shell uname -m)
 endif
 ifeq ($(UNAME),GNU)
